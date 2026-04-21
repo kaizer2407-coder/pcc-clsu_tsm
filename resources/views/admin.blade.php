@@ -12,182 +12,180 @@
 body { background-color: #f4f6f9; }
 .bg-navy { background-color: #0a1f44; }
 .text-yellow { color: #ffc107; }
-
 .card { border-radius: 12px; }
-
-.label {
-    font-weight: 600;
-    color: #0a1f44;
-    font-size: 13px;
-}
-
-.value {
-    font-size: 13px;
-}
-
 </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
+<!-- ================= NAVBAR ================= -->
 <nav class="navbar bg-navy navbar-dark px-3">
     <span class="navbar-brand text-yellow">Admin Panel</span>
     <a href="/login" class="btn btn-warning btn-sm">Logout</a>
 </nav>
 
+<!-- ================= MAIN CONTAINER ================= -->
 <div class="container mt-4">
 
+<!-- ================= ALERTS ================= -->
+@if(session('error'))
+<div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+
+@if(session('success'))
+<div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+<!-- ================= TITLE ================= -->
 <h3 class="mb-4">Admin Dashboard</h3>
 
-<!-- CARDS -->
-<div class="row g-3 mb-3">
-    <div class="col-12 col-md-4">
-        <div class="card p-3 shadow text-center">
+<!-- ================= CARDS ================= -->
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
             <h6>Total Requests</h6>
             <h3>{{ $total ?? 0 }}</h3>
         </div>
     </div>
 
-    <div class="col-12 col-md-4">
-        <div class="card p-3 shadow text-center">
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
             <h6>Approved</h6>
             <h3>{{ $approved ?? 0 }}</h3>
         </div>
     </div>
 
-    <div class="col-12 col-md-4">
-        <div class="card p-3 shadow text-center">
+    <div class="col-md-4">
+        <div class="card p-3 shadow">
             <h6>Pending</h6>
             <h3>{{ $pending ?? 0 }}</h3>
         </div>
     </div>
+
 </div>
 
-<!-- REQUEST LIST -->
-<div class="row g-3">
+<!-- ================= REQUEST TABLE ================= -->
+<div class="card mt-4 shadow">
+
+<div class="card-header bg-navy text-white">
+All Travel Requests
+</div>
+
+<div class="card-body">
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+<th>Passenger</th>
+<th>Destination</th>
+<th>Purpose</th>
+<th>Date</th>
+<th>Requester</th>
+<th>Driver</th>
+<th>Ticket</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
 
 @forelse($requests as $req)
 
-<div class="col-12">
-<div class="card shadow p-3">
+<tr>
 
-<!-- HEADER -->
-<div class="d-flex justify-content-between align-items-center mb-2">
-    <strong>{{ $req->passenger }}</strong>
+<td>{{ $req->passenger }}</td>
+<td>{{ $req->destination }}</td>
+<td>{{ $req->purpose }}</td>
+<td>{{ $req->date }}</td>
+<td>{{ $req->user->name ?? '' }} {{ $req->user->l_name ?? '' }}</td>
 
-    <span class="badge 
-    @if($req->status == 'Approved') bg-success
-    @elseif($req->status == 'Pending') bg-warning text-dark
-    @else bg-danger
-    @endif">
-    {{ $req->status }}
-    </span>
-</div>
+<!-- ================= DRIVER SELECT (NO SAVE BUTTON) ================= -->
+<td>
+<select name="driver"
+        form="approveForm{{ $req->id }}"
+        class="form-select form-select-sm">
 
-<!-- DETAILS -->
-<div class="row mb-2">
-    <div class="col-6">
-        <div class="label">Destination</div>
-        <div class="value">{{ $req->destination }}</div>
-    </div>
-
-    <div class="col-6">
-        <div class="label">Date</div>
-        <div class="value">{{ $req->date }}</div>
-    </div>
-
-    <div class="col-6">
-        <div class="label">Purpose</div>
-        <div class="value">{{ $req->purpose }}</div>
-    </div>
-
-    <div class="col-6">
-        <div class="label">Requester</div>
-        <div class="value">{{ $req->user->name ?? '' }}</div>
-    </div>
-</div>
-
-<!-- DRIVER -->
-<div class="mb-2">
-<select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
 <option value="">Select Driver</option>
 
 @foreach($drivers as $driver)
-<option value="{{ $driver->id }}" {{ $req->driver == $driver->id ? 'selected' : '' }}>
-{{ $driver->name }} - {{ $driver->license_no }}
+
+@php
+$isBusy = \App\Models\RequestModel::where('driver', $driver->id)
+    ->where('date', $req->date)
+    ->where('status', 'Approved')
+    ->exists();
+@endphp
+
+<option value="{{ $driver->id }}"
+    {{ $req->driver == $driver->id ? 'selected' : '' }}
+    {{ $isBusy ? 'disabled' : '' }}>
+    {{ $driver->name }} - {{ $driver->license_no }}
 </option>
+
 @endforeach
 
 </select>
-</div>
+</td>
 
-<!-- TICKET -->
-<div class="mb-2">
+<!-- ================= TICKET ================= -->
+<td>
 <form method="POST" action="/request/{{ $req->id }}/tickets">
 @csrf
-@method('PUT')
 
 <div class="d-flex">
 <input type="text"
        name="tickets"
        class="form-control form-control-sm me-2"
        value="{{ $req->tickets }}"
-       placeholder="Ticket No"
-       {{ $req->tickets ? 'readonly' : '' }}>
+       placeholder="e.g. 2026-128"
+       {{ $req->tickets ? 'readonly' : '' }}
+       required>
 
 @if(!$req->tickets)
 <button class="btn btn-success btn-sm">Save</button>
 @endif
+
 </div>
 
 </form>
-</div>
+</td>
 
-<!-- REMARKS -->
-<div class="mb-2">
-<form method="POST" action="/request/{{ $req->id }}/remarks">
-@csrf
-@method('PUT')
+<!-- ================= STATUS ================= -->
+<td>
+<span class="badge 
+@if($req->status == 'Approved') bg-success
+@elseif($req->status == 'Pending') bg-warning text-dark
+@else bg-danger
+@endif">
+{{ $req->status }}
+</span>
+</td>
 
-<div class="d-flex">
-<input type="text"
-       name="admin_remarks"
-       class="form-control form-control-sm me-2"
-       value="{{ $req->admin_remarks }}"
-       placeholder="Remarks">
+<!-- ================= ACTION BUTTONS ================= -->
+<td class="d-flex gap-2">
 
-<button class="btn btn-primary btn-sm">Save</button>
-</div>
-
-</form>
-</div>
-
-<!-- ACTIONS -->
-<div class="d-flex flex-wrap gap-2 mt-2">
-
+<!-- APPROVE (WITH DRIVER) -->
 <form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
-<button class="btn btn-success btn-sm">
-<i class="bi bi-check"></i>
+<button class="btn btn-success btn-sm" title="Approve">
+<i class="bi bi-check-lg"></i>
 </button>
 </form>
 
-<form method="POST" action="/request/{{ $req->id }}/reject">
-@csrf
-<button class="btn btn-warning btn-sm">
-<i class="bi bi-x"></i>
-</button>
-</form>
+<!-- REJECT -->
+<a href="/request/{{ $req->id }}/reject" class="btn btn-warning btn-sm">
+<i class="bi bi-x-lg"></i>
+</a>
 
-<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
-@csrf
-@method('PUT')
-<button class="btn btn-secondary btn-sm">
+<!-- CLEAR -->
+<a href="/request/{{ $req->id }}/clear" class="btn btn-secondary btn-sm">
 <i class="bi bi-arrow-counterclockwise"></i>
-</button>
-</form>
+</a>
 
+<!-- DELETE -->
 <form method="POST" action="/request/{{ $req->id }}">
 @csrf
 @method('DELETE')
@@ -196,89 +194,153 @@ body { background-color: #f4f6f9; }
 </button>
 </form>
 
-</div>
+</td>
 
-</div>
-</div>
+</tr>
 
 @empty
-<div class="col-12 text-center">No data found</div>
+
+<tr>
+<td colspan="9" class="text-center">No data found</td>
+</tr>
+
 @endforelse
 
-</div>
+</tbody>
+</table>
 
-<!-- PAGINATION -->
 <div class="mt-3">
 {{ $requests->links() }}
 </div>
 
-<!-- DRIVER SECTION -->
+</div>
+</div>
+
+<!-- ================= DRIVER TABLE ================= -->
 <div class="card mt-4 shadow">
 
 <div class="card-header bg-navy text-white d-flex justify-content-between">
 <span>Drivers</span>
 
-<button class="btn btn-warning btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#addDriverModal">
+<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addDriverModal">
 + Add Driver
 </button>
 </div>
 
 <div class="card-body">
 
-<div class="row g-2">
+<table class="table table-hover">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>License</th>
+<th>Status (Today)</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
 
 @forelse($drivers as $driver)
 
-<div class="col-12 col-md-4">
-<div class="card p-2 shadow-sm">
+<tr>
+<td>{{ $driver->name }}</td>
+<td>{{ $driver->license_no }}</td>
 
-<strong>{{ $driver->name }}</strong>
-<div>{{ $driver->license_no }}</div>
+<td>
+@php
+$isBusy = \App\Models\RequestModel::where('driver', $driver->id)
+    ->where('date', date('Y-m-d'))
+    ->where('status', 'Approved')
+    ->exists();
+@endphp
 
-<span class="badge bg-success mt-1">Available</span>
+<span class="badge {{ $isBusy ? 'bg-danger' : 'bg-success' }}">
+{{ $isBusy ? 'On' : 'Available' }}
+</span>
+</td>
 
+<td>
+<button class="btn btn-primary btn-sm"
+data-bs-toggle="modal"
+data-bs-target="#editDriver{{ $driver->id }}">
+Update
+</button>
+</td>
+</tr>
+
+<!-- ================= EDIT DRIVER MODAL ================= -->
+<div class="modal fade" id="editDriver{{ $driver->id }}">
+<div class="modal-dialog">
+<form method="POST" action="/driver/{{ $driver->id }}">
+@csrf
+@method('PUT')
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h5>Edit Driver</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+<input type="text" name="name" class="form-control mb-2" value="{{ $driver->name }}" required>
+<input type="text" name="license_no" class="form-control" value="{{ $driver->license_no }}">
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-success">Update</button>
+</div>
+
+</div>
+</form>
 </div>
 </div>
 
 @empty
-<div class="text-center">No drivers</div>
+
+<tr>
+<td colspan="4" class="text-center">No drivers</td>
+</tr>
+
 @endforelse
 
-</div>
+</tbody>
+</table>
 
 </div>
 </div>
 
 </div>
 
-<!-- MODAL -->
+<!-- ================= ADD DRIVER MODAL ================= -->
 <div class="modal fade" id="addDriverModal">
-  <div class="modal-dialog">
-    <div class="modal-content">
+<div class="modal-dialog">
 
-      <form method="POST" action="/driver">
-        @csrf
+<form method="POST" action="/driver">
+@csrf
 
-        <div class="modal-header">
-          <h5>Add Driver</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+<div class="modal-content">
 
-        <div class="modal-body">
-          <input type="text" name="name" class="form-control mb-2" placeholder="Driver Name" required>
-          <input type="text" name="license_no" class="form-control" placeholder="License No">
-        </div>
+<div class="modal-header">
+<h5>Add Driver</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
 
-        <div class="modal-footer">
-          <button class="btn btn-success">Save</button>
-        </div>
+<div class="modal-body">
+<input type="text" name="name" class="form-control mb-2" placeholder="Driver Name" required>
+<input type="text" name="license_no" class="form-control" placeholder="License No">
+</div>
 
-      </form>
+<div class="modal-footer">
+<button class="btn btn-success">Save</button>
+</div>
 
-    </div>
-  </div>
+</div>
+
+</form>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
