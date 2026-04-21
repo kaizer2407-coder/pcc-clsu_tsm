@@ -174,9 +174,9 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 
 <input type="text"
        name="admin_remarks"
-       class="form-control form-control-sm"
        value="{{ $req->admin_remarks }}"
-       placeholder="Remarks">
+       class="form-control form-control-sm"
+       form="approveForm{{ $req->id }}">
 </form>
 </td>
 

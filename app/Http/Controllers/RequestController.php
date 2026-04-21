@@ -34,27 +34,21 @@ class RequestController extends Controller
     {
         $req = RequestModel::findOrFail($id);
 
-        // ❗ prevent approve without driver
-        if (!$request->driver) {
-            return back()->with('error', 'Select driver first!');
+        $req->status = 'Approved';
+        $req->driver = $request->driver;
+
+        // ✅ prevent null overwrite
+        if ($request->filled('tickets')) {
+            $req->tickets = $request->tickets;
         }
 
-        // ❗ prevent double booking
-        $exists = RequestModel::where('driver', $request->driver)
-            ->where('date', $req->date)
-            ->where('status', 'Approved')
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Driver already booked!');
+        if ($request->filled('admin_remarks')) {
+            $req->admin_remarks = $request->admin_remarks;
         }
 
-        $req->update([
-            'status' => 'Approved',
-            'driver' => $request->driver
-        ]);
+        $req->save();
 
-        return back()->with('success', 'Request approved');
+        return back()->with('success', 'Approved successfully');
     }
 
 
