@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('requests', function (Blueprint $table) {
             $table->text('admin_remarks')->nullable();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('request_models', function (Blueprint $table) {
-            //
+        Schema::table('requests', function (Blueprint $table) {
+            $table->dropColumn('admin_remarks'); // ✅ FIX
         });
     }
 };
