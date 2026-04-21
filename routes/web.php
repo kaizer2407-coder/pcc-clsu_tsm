@@ -276,3 +276,7 @@ Route::put('/driver/{id}', function ($id, Request $request) {
 
     return back();
 });
+
+Route::get('/test', function () {
+    return 'OK';
+});
