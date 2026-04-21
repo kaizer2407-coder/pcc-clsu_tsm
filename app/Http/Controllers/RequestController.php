@@ -128,4 +128,18 @@ class RequestController extends Controller
         return back()->with('success', 'Request deleted');
     }
 
+    public function resetAll($id)
+{
+    $req = RequestModel::findOrFail($id);
+
+    $req->update([
+        'status' => 'Pending',
+        'driver' => null,
+        'tickets' => null,
+        'admin_remarks' => null, // ✅ clear remarks
+    ]);
+
+    return back()->with('success', 'Request reset successfully');
+}
+
 }

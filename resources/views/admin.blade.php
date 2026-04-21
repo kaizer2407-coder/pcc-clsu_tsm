@@ -197,12 +197,11 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 </a>
 
 <!-- RESET TICKET -->
-<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
-@csrf
-@method('PUT')
-<button class="btn btn-secondary btn-sm">
-<i class="bi bi-arrow-counterclockwise"></i>
-</button>
+<form method="POST" action="/request/{{ $req->id }}/reset">
+    @csrf
+    <button class="btn btn-secondary btn-sm">
+        <i class="bi bi-arrow-counterclockwise"></i>
+    </button>
 </form>
 
 <!-- CLEAR -->

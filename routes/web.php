@@ -178,3 +178,4 @@ Route::post('/request/{id}/approve', [RequestController::class, 'approve']);
 Route::post('/request/{id}/reject', [RequestController::class, 'reject']);
 
 Route::delete('/request/{id}', [RequestController::class, 'destroy']);
+Route::post('/request/{id}/reset', [RequestController::class, 'resetAll']);
