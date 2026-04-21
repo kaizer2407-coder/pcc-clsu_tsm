@@ -26,6 +26,7 @@ class RequestController extends Controller
         $req->tickets = $request->tickets;
         $req->save();
 
+     
         return back()->with('success', 'Ticket saved');
     }
 }
