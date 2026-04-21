@@ -98,7 +98,7 @@ body { background-color: #f4f6f9; }
 <select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
 <option value="">Select</option>
 @foreach($drivers as $driver)
-<option value="{{ $driver->id }}">{{ $driver->name }}</option>
+<option value="{{ $driver->id }}">{{ $driver->name }} - {{ $driver->license }}</option>
 @endforeach
 </select>
 </td>
