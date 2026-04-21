@@ -11,14 +11,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
-
 RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 10000
 
-CMD php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    php artisan migrate --force && \
-    php -S 0.0.0.0:10000 -t public
+CMD php -S 0.0.0.0:10000 -t public
