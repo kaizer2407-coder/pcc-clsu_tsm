@@ -11,6 +11,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install
 RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 10000
