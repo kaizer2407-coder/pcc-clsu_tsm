@@ -45,7 +45,6 @@ Route::post('/register', function (Request $request) {
     return redirect('/login')->with('success', 'Account created!');
 });
 
-
 // LOGIN
 Route::post('/login', function (Request $request) {
 
@@ -78,52 +77,13 @@ Route::get('/dashboard', function () {
 
     $requests = RequestModel::where('user_id', Auth::id())->latest()->paginate(5);
 
-    $approved = RequestModel::where('user_id', Auth::id())
-        ->where('status', 'Approved')->count();
-
-    $pending = RequestModel::where('user_id', Auth::id())
-        ->where('status', 'Pending')->count();
-
-    $cancel = RequestModel::where('user_id', Auth::id())
-        ->where('status', 'Cancel')->count();
+    $approved = RequestModel::where('user_id', Auth::id())->where('status', 'Approved')->count();
+    $pending = RequestModel::where('user_id', Auth::id())->where('status', 'Pending')->count();
+    $cancel = RequestModel::where('user_id', Auth::id())->where('status', 'Cancel')->count();
 
     return view('dashboard', compact('requests', 'approved', 'pending', 'cancel'));
 
 })->middleware('auth');
-
-
-/*
-|--------------------------------------------------------------------------
-| USER REQUESTS
-|--------------------------------------------------------------------------
-*/
-
-// CREATE
-Route::post('/request', function (Request $request) {
-
-    RequestModel::create([
-        'user_id' => Auth::id(),
-        'passenger' => $request->passenger,
-        'destination' => $request->destination,
-        'purpose' => $request->purpose,
-        'date' => $request->date,
-        'status' => 'Pending',
-    ]);
-
-    return back();
-});
-
-// DELETE
-Route::delete('/request/{id}', function ($id) {
-
-    $req = RequestModel::where('id', $id)
-        ->where('user_id', Auth::id())
-        ->firstOrFail();
-
-    $req->delete();
-
-    return back();
-});
 
 
 /*
@@ -158,92 +118,23 @@ Route::get('/admin', function () {
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN ACTIONS
+| REQUEST CONTROLLER (ONLY THESE)
 |--------------------------------------------------------------------------
 */
 
-// APPROVE + ASSIGN DRIVER
-Route::post('/request/{id}/approve', function ($id, Request $request) {
+Route::middleware('auth')->group(function () {
 
-    abort_if(Auth::user()->role !== 'admin', 403);
+    Route::post('/request', [RequestController::class, 'store']);
 
-    $req = RequestModel::findOrFail($id);
+    Route::post('/request/{id}/approve', [RequestController::class, 'approve']);
+    Route::post('/request/{id}/reject', [RequestController::class, 'reject']);
 
-    if (!$request->driver) {
-        return back()->with('error', 'Select driver first!');
-    }
+    Route::put('/request/{id}/tickets', [RequestController::class, 'updateTickets']);
+    Route::put('/request/{id}/reset-ticket', [RequestController::class, 'resetTicket']);
 
-    // CHECK IF DRIVER ALREADY BOOKED
-    $exists = RequestModel::where('driver', $request->driver)
-        ->where('date', $req->date)
-        ->where('status', 'Approved')
-        ->exists();
+    Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);
 
-    if ($exists) {
-        return back()->with('error', 'Driver already booked!');
-    }
-
-    $req->update([
-        'driver' => $request->driver,
-        'status' => 'Approved'
-    ]);
-
-    return back()->with('success', 'Approved successfully!');
-});
-
-// REJECT
-Route::get('/request/{id}/reject', function ($id) {
-
-    abort_if(Auth::user()->role !== 'admin', 403);
-
-    RequestModel::findOrFail($id)->update([
-        'status' => 'Cancel'
-    ]);
-
-    return back();
-});
-
-// RESET
-Route::get('/request/{id}/clear', function ($id) {
-
-    $req = \App\Models\RequestModel::findOrFail($id);
-
-    // 🔽 ADD HERE
-    $driver = \App\Models\Driver::find($req->driver);
-
-    if ($driver) {
-        $driver->update(['status' => 'Available']);
-    }
-
-    $req->update([
-        'status' => 'Pending',
-        'driver' => null,
-        'tickets' => null
-    ]);
-
-    return back();
-});
-
-// SAVE TICKETS
-Route::post('/request/{id}/tickets', function ($id, Request $request) {
-
-    $req = RequestModel::findOrFail($id);
-
-    $req->update([
-        'tickets' => $request->tickets
-    ]);
-
-    return back();
-});
-
-// DELETE (ADMIN)
-Route::delete('/request/{id}', function ($id) {
-
-    abort_if(Auth::user()->role !== 'admin', 403);
-
-    RequestModel::findOrFail($id)->delete();
-
-    return back();
+    Route::delete('/request/{id}', [RequestController::class, 'destroy']);
 });
 
 
@@ -253,7 +144,6 @@ Route::delete('/request/{id}', function ($id) {
 |--------------------------------------------------------------------------
 */
 
-// ADD DRIVER
 Route::post('/driver', function (Request $request) {
 
     Driver::create([
@@ -265,7 +155,6 @@ Route::post('/driver', function (Request $request) {
     return back();
 });
 
-// UPDATE DRIVER
 Route::put('/driver/{id}', function ($id, Request $request) {
 
     abort_if(Auth::user()->role !== 'admin', 403);
@@ -278,18 +167,5 @@ Route::put('/driver/{id}', function ($id, Request $request) {
     return back();
 });
 
-Route::get('/test', function () {
-    return 'OK';
-});
 
-Route::post('/request', [RequestController::class, 'store']);
-
-Route::post('/request/{id}/approve', [RequestController::class, 'approve']);
-Route::post('/request/{id}/reject', [RequestController::class, 'reject']);
-
-Route::put('/request/{id}/tickets', [RequestController::class, 'updateTickets']);
-Route::put('/request/{id}/reset-ticket', [RequestController::class, 'resetTicket']);
-
-Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);
-
-Route::delete('/request/{id}', [RequestController::class, 'destroy']);
+Route::get('/test', fn() => 'OK');
