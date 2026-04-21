@@ -120,6 +120,16 @@ body { background-color: #f4f6f9; }
        value="{{ $req->tickets }}">
 </td>
 
+<!-- ✅ REMARKS (NO BUTTON) -->
+<td>
+<input type="text"
+       name="admin_remarks"
+       class="form-control form-control-sm"
+       value="{{ $req->admin_remarks }}"
+       placeholder="Remarks"
+       {{ $req->status == 'Approved' ? 'readonly' : '' }}>
+</td>
+
 <!-- STATUS -->
 <td>
 <span class="badge 
@@ -129,16 +139,6 @@ body { background-color: #f4f6f9; }
 @endif">
 {{ $req->status }}
 </span>
-</td>
-
-<!-- ✅ REMARKS (NO BUTTON) -->
-<td>
-<input type="text"
-       name="admin_remarks"
-       class="form-control form-control-sm"
-       value="{{ $req->admin_remarks }}"
-       placeholder="Remarks"
-       {{ $req->status == 'Approved' ? 'readonly' : '' }}>
 </td>
 
 <!-- ACTION -->
