@@ -18,16 +18,15 @@ body { background-color: #f4f6f9; }
 
 <body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- NAVBAR -->
 <nav class="navbar bg-navy navbar-dark px-3">
     <span class="navbar-brand text-yellow">Admin Panel</span>
-    <a href="/login" class="btn btn-warning btn-sm">Logout</a>
+    <a href="/logout" class="btn btn-warning btn-sm">Logout</a>
 </nav>
 
-<!-- ================= MAIN CONTAINER ================= -->
 <div class="container mt-4">
 
-<!-- ================= ALERTS ================= -->
+<!-- ALERTS -->
 @if(session('error'))
 <div class="alert alert-danger">{{ session('error') }}</div>
 @endif
@@ -36,32 +35,31 @@ body { background-color: #f4f6f9; }
 <div class="alert alert-success">{{ session('success') }}</div>
 @endif
 
-<!-- ================= TITLE ================= -->
 <h3 class="mb-4">Admin Dashboard</h3>
 
-<!-- ================= CARDS ================= -->
-<div class="row g-4">
+<!-- DASHBOARD CARDS -->
+<div class="row g-3">
 
-    <div class="col-md-4">
-        <div class="card p-3 shadow">
-            <h6>Total Requests</h6>
-            <h3>{{ $total ?? 0 }}</h3>
-        </div>
-    </div>
+<div class="col-md-4">
+<div class="card p-3 shadow">
+<h6>Total Requests</h6>
+<h3>{{ $total }}</h3>
+</div>
+</div>
 
-    <div class="col-md-4">
-        <div class="card p-3 shadow">
-            <h6>Approved</h6>
-            <h3>{{ $approved ?? 0 }}</h3>
-        </div>
-    </div>
+<div class="col-md-4">
+<div class="card p-3 shadow">
+<h6>Approved</h6>
+<h3>{{ $approved }}</h3>
+</div>
+</div>
 
-    <div class="col-md-4">
-        <div class="card p-3 shadow">
-            <h6>Pending</h6>
-            <h3>{{ $pending ?? 0 }}</h3>
-        </div>
-    </div>
+<div class="col-md-4">
+<div class="card p-3 shadow">
+<h6>Pending</h6>
+<h3>{{ $pending }}</h3>
+</div>
+</div>
 
 </div>
 
@@ -73,6 +71,8 @@ All Travel Requests
 </div>
 
 <div class="card-body">
+
+<div class="table-responsive">
 
 <table class="table table-hover">
 
@@ -86,6 +86,7 @@ All Travel Requests
 <th>Driver</th>
 <th>Ticket</th>
 <th>Status</th>
+<th>Remarks</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -100,9 +101,9 @@ All Travel Requests
 <td>{{ $req->destination }}</td>
 <td>{{ $req->purpose }}</td>
 <td>{{ $req->date }}</td>
-<td>{{ $req->user->name ?? '' }} {{ $req->user->l_name ?? '' }}</td>
+<td>{{ $req->user->name ?? '' }}</td>
 
-<!-- ================= DRIVER SELECT (NO SAVE BUTTON) ================= -->
+<!-- DRIVER -->
 <td>
 <select name="driver"
         form="approveForm{{ $req->id }}"
@@ -130,17 +131,19 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 </select>
 </td>
 
-<!-- ================= TICKET ================= -->
+<!-- TICKET -->
 <td>
 <form method="POST" action="/request/{{ $req->id }}/tickets">
 @csrf
+@method('PUT')
 
 <div class="d-flex">
+
 <input type="text"
        name="tickets"
        class="form-control form-control-sm me-2"
        value="{{ $req->tickets }}"
-       placeholder="e.g. 2026-128"
+       placeholder="Ticket no."
        {{ $req->tickets ? 'readonly' : '' }}
        required>
 
@@ -149,11 +152,10 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 @endif
 
 </div>
-
 </form>
 </td>
 
-<!-- ================= STATUS ================= -->
+<!-- STATUS -->
 <td>
 <span class="badge 
 @if($req->status == 'Approved') bg-success
@@ -164,13 +166,27 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 </span>
 </td>
 
-<!-- ================= ACTION BUTTONS ================= -->
-<td class="d-flex gap-2">
+<!-- REMARKS -->
+<td>
+<form method="POST" action="/request/{{ $req->id }}/remarks">
+@csrf
+@method('PUT')
 
-<!-- APPROVE (WITH DRIVER) -->
+<input type="text"
+       name="admin_remarks"
+       class="form-control form-control-sm"
+       value="{{ $req->admin_remarks }}"
+       placeholder="Remarks">
+</form>
+</td>
+
+<!-- ACTION -->
+<td class="d-flex gap-1 flex-wrap">
+
+<!-- APPROVE -->
 <form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
-<button class="btn btn-success btn-sm" title="Approve">
+<button class="btn btn-success btn-sm">
 <i class="bi bi-check-lg"></i>
 </button>
 </form>
@@ -180,9 +196,18 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 <i class="bi bi-x-lg"></i>
 </a>
 
-<!-- CLEAR -->
-<a href="/request/{{ $req->id }}/clear" class="btn btn-secondary btn-sm">
+<!-- RESET TICKET -->
+<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
+@csrf
+@method('PUT')
+<button class="btn btn-secondary btn-sm">
 <i class="bi bi-arrow-counterclockwise"></i>
+</button>
+</form>
+
+<!-- CLEAR -->
+<a href="/request/{{ $req->id }}/clear" class="btn btn-dark btn-sm">
+<i class="bi bi-eraser"></i>
 </a>
 
 <!-- DELETE -->
@@ -201,13 +226,15 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 @empty
 
 <tr>
-<td colspan="9" class="text-center">No data found</td>
+<td colspan="10" class="text-center">No data found</td>
 </tr>
 
 @endforelse
 
 </tbody>
 </table>
+
+</div>
 
 <div class="mt-3">
 {{ $requests->links() }}
@@ -235,8 +262,7 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 <tr>
 <th>Name</th>
 <th>License</th>
-<th>Status (Today)</th>
-<th>Action</th>
+<th>Status Today</th>
 </tr>
 </thead>
 
@@ -251,62 +277,28 @@ $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
 <td>
 @php
 $isBusy = \App\Models\RequestModel::where('driver', $driver->id)
-    ->where('date', date('Y-m-d'))
-    ->where('status', 'Approved')
-    ->exists();
+->where('date', date('Y-m-d'))
+->where('status', 'Approved')
+->exists();
 @endphp
 
 <span class="badge {{ $isBusy ? 'bg-danger' : 'bg-success' }}">
-{{ $isBusy ? 'On' : 'Available' }}
+{{ $isBusy ? 'On Trip' : 'Available' }}
 </span>
 </td>
 
-<td>
-<button class="btn btn-primary btn-sm"
-data-bs-toggle="modal"
-data-bs-target="#editDriver{{ $driver->id }}">
-Update
-</button>
-</td>
 </tr>
-
-<!-- ================= EDIT DRIVER MODAL ================= -->
-<div class="modal fade" id="editDriver{{ $driver->id }}">
-<div class="modal-dialog">
-<form method="POST" action="/driver/{{ $driver->id }}">
-@csrf
-@method('PUT')
-
-<div class="modal-content">
-
-<div class="modal-header">
-<h5>Edit Driver</h5>
-<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-
-<div class="modal-body">
-<input type="text" name="name" class="form-control mb-2" value="{{ $driver->name }}" required>
-<input type="text" name="license_no" class="form-control" value="{{ $driver->license_no }}">
-</div>
-
-<div class="modal-footer">
-<button class="btn btn-success">Update</button>
-</div>
-
-</div>
-</form>
-</div>
-</div>
 
 @empty
 
 <tr>
-<td colspan="4" class="text-center">No drivers</td>
+<td colspan="3" class="text-center">No drivers</td>
 </tr>
 
 @endforelse
 
 </tbody>
+
 </table>
 
 </div>
@@ -314,7 +306,7 @@ Update
 
 </div>
 
-<!-- ================= ADD DRIVER MODAL ================= -->
+<!-- ADD DRIVER MODAL -->
 <div class="modal fade" id="addDriverModal">
 <div class="modal-dialog">
 
@@ -340,6 +332,7 @@ Update
 </div>
 
 </form>
+
 </div>
 </div>
 
