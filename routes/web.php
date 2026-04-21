@@ -282,9 +282,14 @@ Route::get('/test', function () {
     return 'OK';
 });
 
+Route::post('/request', [RequestController::class, 'store']);
+
 Route::post('/request/{id}/approve', [RequestController::class, 'approve']);
 Route::post('/request/{id}/reject', [RequestController::class, 'reject']);
-Route::put('/request/{id}/tickets', [RequestController::class, 'saveTicket']);
-Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);
+
+Route::put('/request/{id}/tickets', [RequestController::class, 'updateTickets']);
 Route::put('/request/{id}/reset-ticket', [RequestController::class, 'resetTicket']);
+
+Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);
+
 Route::delete('/request/{id}', [RequestController::class, 'destroy']);
