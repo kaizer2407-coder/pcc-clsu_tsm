@@ -145,15 +145,8 @@ body { background-color: #f4f6f9; }
 <td>
 <div class="d-flex gap-1 flex-wrap">
 
-<!-- ✅ UPDATE BUTTON -->
-<button type="submit" class="btn btn-primary btn-sm" title="Update">
-<i class="bi bi-save"></i>
-</button>
-
-</form> <!-- ✅ CLOSE UPDATE FORM -->
-
 <!-- APPROVE -->
-<form method="POST" action="/request/{{ $req->id }}/approve">
+<form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
 <button class="btn btn-success btn-sm">
 <i class="bi bi-check"></i>
@@ -168,21 +161,21 @@ body { background-color: #f4f6f9; }
 </button>
 </form>
 
+<!-- RESET TICKET -->
+<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
+@csrf
+@method('PUT')
+<button class="btn btn-secondary btn-sm">
+<i class="bi bi-arrow-counterclockwise"></i>
+</button>
+</form>
+
 <!-- DELETE -->
 <form method="POST" action="/request/{{ $req->id }}">
 @csrf
 @method('DELETE')
 <button class="btn btn-danger btn-sm">
 <i class="bi bi-trash"></i>
-</button>
-</form>
-
-<!-- RESET TICKET -->
-<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
-@csrf
-@method('PUT')
-<button class="btn btn-secondary btn-sm" title="Reset Ticket">
-<i class="bi bi-arrow-counterclockwise"></i>
 </button>
 </form>
 
