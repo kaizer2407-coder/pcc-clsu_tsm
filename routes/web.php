@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\RequestModel;
 use App\Models\Driver;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RequestController;
 
 /*
 |--------------------------------------------------------------------------
