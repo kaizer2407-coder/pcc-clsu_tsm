@@ -89,20 +89,15 @@ body { background-color: #f4f6f9; }
 @forelse($requests as $req)
 <tr>
 
-<!-- ✅ UPDATE FORM -->
-<form method="POST" action="/request/{{ $req->id }}/update-all">
-@csrf
-@method('PUT')
-
 <td>{{ $req->passenger }}</td>
 <td>{{ $req->destination }}</td>
 <td class="d-none d-md-table-cell">{{ $req->purpose }}</td>
 <td>{{ $req->date }}</td>
 <td class="d-none d-md-table-cell">{{ $req->user->name ?? '' }}</td>
 
-<!-- DRIVER -->
+<!-- DRIVER (linked to approve) -->
 <td>
-<select name="driver" class="form-select form-select-sm">
+<select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
 <option value="">Select</option>
 @foreach($drivers as $driver)
 <option value="{{ $driver->id }}" {{ $req->driver == $driver->id ? 'selected' : '' }}>
@@ -114,20 +109,23 @@ body { background-color: #f4f6f9; }
 
 <!-- TICKET -->
 <td class="d-none d-md-table-cell">
+<form method="POST" action="/request/{{ $req->id }}/tickets">
+@csrf
+@method('PUT')
+
+<div class="d-flex">
 <input type="text"
        name="tickets"
-       class="form-control form-control-sm"
-       value="{{ $req->tickets }}">
-</td>
+       class="form-control form-control-sm me-2"
+       value="{{ $req->tickets }}"
+       {{ $req->tickets ? 'readonly' : '' }}>
 
-<!-- ✅ REMARKS (NO BUTTON) -->
-<td>
-<input type="text"
-       name="admin_remarks"
-       class="form-control form-control-sm"
-       value="{{ $req->admin_remarks }}"
-       placeholder="Remarks"
-       {{ $req->status == 'Approved' ? 'readonly' : '' }}>
+@if(!$req->tickets)
+<button class="btn btn-success btn-sm">Save</button>
+@endif
+</div>
+
+</form>
 </td>
 
 <!-- STATUS -->
@@ -139,6 +137,25 @@ body { background-color: #f4f6f9; }
 @endif">
 {{ $req->status }}
 </span>
+</td>
+
+<!-- REMARKS -->
+<td>
+<form method="POST" action="/request/{{ $req->id }}/remarks">
+@csrf
+@method('PUT')
+
+<div class="d-flex">
+<input type="text"
+       name="admin_remarks"
+       class="form-control form-control-sm me-2"
+       value="{{ $req->admin_remarks }}"
+       placeholder="Remarks">
+
+<button class="btn btn-primary btn-sm">Save</button>
+</div>
+
+</form>
 </td>
 
 <!-- ACTION -->
@@ -190,41 +207,6 @@ body { background-color: #f4f6f9; }
 </tr>
 @endforelse
 </tbody>
-
-</table>
-</div>
-
-{{ $requests->links() }}
-
-</div>
-</div>
-
-<!-- DRIVER TABLE -->
-<div class="card mt-4 shadow">
-
-<div class="card-header bg-navy text-white d-flex justify-content-between">
-<span>Drivers</span>
-
-<button type="button" class="btn btn-warning btn-sm"
-        data-bs-toggle="modal"
-        data-bs-target="#addDriverModal">
-+ Add Driver
-</button>
-</div>
-
-<div class="card-body">
-<div class="table-responsive">
-<table class="table table-hover">
-
-<thead>
-<tr>
-<th>Name</th>
-<th>License</th>
-<th>Status</th>
-</tr>
-</thead>
-
-<tbody>
 @forelse($drivers as $driver)
 <tr>
 <td>{{ $driver->name }}</td>
