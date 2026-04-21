@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->string('status')->default('Available'); // ✅ ADD THIS
+            if (!Schema::hasColumn('drivers', 'status')) {
+                $table->string('status')->default('Available');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('drivers', function (Blueprint $table) {
-            $table->dropColumn('status');
+            if (Schema::hasColumn('drivers', 'status')) {
+                $table->dropColumn('status');
+            }
         });
     }
 };
