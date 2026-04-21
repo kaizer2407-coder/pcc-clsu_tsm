@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 abstract class Controller
 {
@@ -31,15 +33,15 @@ abstract class Controller
     }
 
     public function updateAll(Request $request, $id)
-{
-    $req = RequestModel::findOrFail($id);
+    {
+        $req = RequestModel::findOrFail($id);
 
-    $req->driver = $request->driver;
-    $req->tickets = $request->tickets;
-    $req->admin_remarks = $request->admin_remarks;
+        $req->driver = $request->driver;
+        $req->tickets = $request->tickets;
+        $req->admin_remarks = $request->admin_remarks;
 
-    $req->save();
+        $req->save();
 
-    return back()->with('success', 'Updated successfully');
-}
+        return back()->with('success', 'Updated successfully');
+    }
 }

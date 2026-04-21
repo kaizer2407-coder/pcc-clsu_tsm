@@ -8,7 +8,9 @@ use App\Models\RequestModel;
 class RequestController extends Controller
 {
 
-    // ✅ USER CREATE REQUEST (NO TICKET)
+    // =============================
+    // CREATE REQUEST (USER)
+    // =============================
     public function store(Request $request)
     {
         RequestModel::create([
@@ -18,39 +20,62 @@ class RequestController extends Controller
             'purpose' => $request->purpose,
             'date' => $request->date,
             'status' => 'Pending',
-            'tickets' => null, // ✅ important
+            'tickets' => null,
         ]);
 
         return back()->with('success', 'Request submitted');
     }
 
 
-    // ✅ APPROVE (WITH DRIVER)
+    // =============================
+    // APPROVE + DRIVER
+    // =============================
     public function approve(Request $request, $id)
     {
         $req = RequestModel::findOrFail($id);
 
-        $req->status = 'Approved';
-        $req->driver = $request->driver; // from select
-        $req->save();
+        // ❗ prevent approve without driver
+        if (!$request->driver) {
+            return back()->with('error', 'Select driver first!');
+        }
+
+        // ❗ prevent double booking
+        $exists = RequestModel::where('driver', $request->driver)
+            ->where('date', $req->date)
+            ->where('status', 'Approved')
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Driver already booked!');
+        }
+
+        $req->update([
+            'status' => 'Approved',
+            'driver' => $request->driver
+        ]);
 
         return back()->with('success', 'Request approved');
     }
 
 
-    // ✅ REJECT
+    // =============================
+    // REJECT
+    // =============================
     public function reject($id)
     {
         $req = RequestModel::findOrFail($id);
 
-        $req->status = 'Rejected';
-        $req->save();
+        $req->update([
+            'status' => 'Cancel'
+        ]);
 
         return back()->with('success', 'Request rejected');
     }
 
 
-    // ✅ UPDATE TICKET (ADMIN ONLY)
+    // =============================
+    // UPDATE TICKET
+    // =============================
     public function updateTickets(Request $request, $id)
     {
         $req = RequestModel::findOrFail($id);
@@ -60,38 +85,47 @@ class RequestController extends Controller
             return back()->with('error', 'Ticket already set');
         }
 
-        $req->tickets = $request->tickets;
-        $req->save();
+        $req->update([
+            'tickets' => $request->tickets
+        ]);
 
         return back()->with('success', 'Ticket saved');
     }
 
 
-    // ✅ RESET TICKET
+    // =============================
+    // RESET TICKET
+    // =============================
     public function resetTicket($id)
     {
         $req = RequestModel::findOrFail($id);
 
-        $req->tickets = null;
-        $req->save();
+        $req->update([
+            'tickets' => null
+        ]);
 
         return back()->with('success', 'Ticket reset');
     }
 
 
-    // ✅ UPDATE ADMIN REMARKS
+    // =============================
+    // ADMIN REMARKS
+    // =============================
     public function updateRemarks(Request $request, $id)
     {
         $req = RequestModel::findOrFail($id);
 
-        $req->admin_remarks = $request->admin_remarks;
-        $req->save();
+        $req->update([
+            'admin_remarks' => $request->admin_remarks
+        ]);
 
         return back()->with('success', 'Remarks updated');
     }
 
 
-    // ✅ DELETE REQUEST
+    // =============================
+    // DELETE
+    // =============================
     public function destroy($id)
     {
         $req = RequestModel::findOrFail($id);
