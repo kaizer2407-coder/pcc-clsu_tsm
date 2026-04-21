@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('date');
             $table->string('status')->default('Pending');
             $table->string('driver')->nullable();
+            $table->integer('tickets')->nullable();
             $table->timestamps();
         }); // ✅ FIXED
     }
