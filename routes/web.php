@@ -280,3 +280,4 @@ Route::put('/driver/{id}', function ($id, Request $request) {
 Route::get('/test', function () {
     return 'OK';
 });
+

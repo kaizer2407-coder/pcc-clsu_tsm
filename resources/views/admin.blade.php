@@ -16,21 +16,9 @@ body { background-color: #f4f6f9; }
 
 /* MOBILE FIX */
 @media (max-width: 768px) {
-
-    table {
-        font-size: 11px;
-    }
-
-    th, td {
-        padding: 5px;
-        white-space: nowrap;
-    }
-
-    .btn-sm {
-        padding: 3px 6px;
-        font-size: 10px;
-    }
-
+    table { font-size: 11px; }
+    th, td { padding: 5px; white-space: nowrap; }
+    .btn-sm { padding: 3px 6px; font-size: 10px; }
     .form-control-sm, .form-select-sm {
         font-size: 10px;
         padding: 2px;
@@ -75,15 +63,11 @@ body { background-color: #f4f6f9; }
     </div>
 </div>
 
-<!-- ================= REQUEST TABLE ================= -->
+<!-- REQUEST TABLE -->
 <div class="card mt-4 shadow">
-
-<div class="card-header bg-navy text-white">
-All Travel Requests
-</div>
+<div class="card-header bg-navy text-white">All Travel Requests</div>
 
 <div class="card-body">
-
 <div class="table-responsive">
 <table class="table table-hover">
 
@@ -102,9 +86,7 @@ All Travel Requests
 </thead>
 
 <tbody>
-
 @forelse($requests as $req)
-
 <tr>
 <td>{{ $req->passenger }}</td>
 <td>{{ $req->destination }}</td>
@@ -115,22 +97,14 @@ All Travel Requests
 <td>
 <select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
 <option value="">Select</option>
-
 @foreach($drivers as $driver)
-<option value="{{ $driver->id }}">
-{{ $driver->name }}
-</option>
+<option value="{{ $driver->id }}">{{ $driver->name }}</option>
 @endforeach
-
 </select>
 </td>
 
 <td class="d-none d-md-table-cell">
-<form method="POST" action="/request/{{ $req->id }}/tickets">
-@csrf
-<input type="text" name="tickets" class="form-control form-control-sm"
-value="{{ $req->tickets }}">
-</form>
+<input type="text" class="form-control form-control-sm" value="{{ $req->tickets }}">
 </td>
 
 <td>
@@ -145,12 +119,9 @@ value="{{ $req->tickets }}">
 
 <td>
 <div class="d-flex gap-1 flex-wrap">
-
 <form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
-<button class="btn btn-success btn-sm">
-<i class="bi bi-check"></i>
-</button>
+<button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check"></i></button>
 </form>
 
 <a href="/request/{{ $req->id }}/reject" class="btn btn-warning btn-sm">
@@ -160,25 +131,19 @@ value="{{ $req->tickets }}">
 <form method="POST" action="/request/{{ $req->id }}">
 @csrf
 @method('DELETE')
-<button class="btn btn-danger btn-sm">
-<i class="bi bi-trash"></i>
-</button>
+<button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
 </form>
-
 </div>
 </td>
 
 </tr>
-
 @empty
-
 <tr>
 <td colspan="9" class="text-center">No data found</td>
 </tr>
-
 @endforelse
-
 </tbody>
+
 </table>
 </div>
 
@@ -187,19 +152,20 @@ value="{{ $req->tickets }}">
 </div>
 </div>
 
-<!-- ================= DRIVER TABLE ================= -->
+<!-- DRIVER TABLE -->
 <div class="card mt-4 shadow">
 
 <div class="card-header bg-navy text-white d-flex justify-content-between">
 <span>Drivers</span>
 
-<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#addDriverModal">
-+ Add
+<button type="button" class="btn btn-warning btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#addDriverModal">
++ Add Driver
 </button>
 </div>
 
 <div class="card-body">
-
 <div class="table-responsive">
 <table class="table table-hover">
 
@@ -212,36 +178,55 @@ value="{{ $req->tickets }}">
 </thead>
 
 <tbody>
-
 @forelse($drivers as $driver)
-
 <tr>
 <td>{{ $driver->name }}</td>
 <td>{{ $driver->license_no }}</td>
-
-<td>
-<span class="badge bg-success">Available</span>
-</td>
-
+<td><span class="badge bg-success">Available</span></td>
 </tr>
-
 @empty
-
 <tr>
 <td colspan="3" class="text-center">No drivers</td>
 </tr>
-
 @endforelse
-
 </tbody>
+
 </table>
 </div>
-
 </div>
 </div>
 
 </div>
 
+<!-- ✅ ADD DRIVER MODAL (FIXED) -->
+<div class="modal fade" id="addDriverModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="/driver">
+        @csrf
+
+        <div class="modal-header">
+          <h5 class="modal-title">Add Driver</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="text" name="name" class="form-control mb-2" placeholder="Driver Name" required>
+          <input type="text" name="license_no" class="form-control" placeholder="License No">
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<!-- ✅ ONLY ONE JS (IMPORTANT) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
