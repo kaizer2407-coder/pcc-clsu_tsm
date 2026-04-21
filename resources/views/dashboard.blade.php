@@ -74,6 +74,7 @@
                         <th>Driver</th>
                         <th>Ticket No.</th>
                         <th>Status</th>
+                        <th>Rmarks</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -102,6 +103,11 @@
                             <span class="badge bg-warning text-dark">
                                 {{ $req->status }}
                             </span>
+                        </td>
+                        <td>
+                        <span class="text-success">
+                        {{ $req->admin_remarks ?? 'No remarks yet' }}
+                        </span>
                         </td>
 
                         <td>

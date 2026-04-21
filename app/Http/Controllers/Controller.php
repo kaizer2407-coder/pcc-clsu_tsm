@@ -19,4 +19,14 @@ abstract class Controller
 
         return back();
     }
+
+    public function updateRemarks(Request $request, $id)
+    {
+        $req = RequestModel::findOrFail($id);
+
+        $req->admin_remarks = $request->admin_remarks;
+        $req->save();
+
+        return back()->with('success', 'Remarks updated');
+    }
 }

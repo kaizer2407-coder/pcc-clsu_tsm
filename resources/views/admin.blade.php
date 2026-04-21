@@ -14,7 +14,6 @@ body { background-color: #f4f6f9; }
 .text-yellow { color: #ffc107; }
 .card { border-radius: 12px; }
 
-/* MOBILE FIX */
 @media (max-width: 768px) {
     table { font-size: 11px; }
     th, td { padding: 5px; white-space: nowrap; }
@@ -81,6 +80,7 @@ body { background-color: #f4f6f9; }
 <th>Driver</th>
 <th class="d-none d-md-table-cell">Ticket</th>
 <th>Status</th>
+<th>Remarks</th>
 <th>Action</th>
 </tr>
 </thead>
@@ -88,25 +88,31 @@ body { background-color: #f4f6f9; }
 <tbody>
 @forelse($requests as $req)
 <tr>
+
 <td>{{ $req->passenger }}</td>
 <td>{{ $req->destination }}</td>
 <td class="d-none d-md-table-cell">{{ $req->purpose }}</td>
 <td>{{ $req->date }}</td>
 <td class="d-none d-md-table-cell">{{ $req->user->name ?? '' }}</td>
 
+<!-- DRIVER -->
 <td>
 <select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
 <option value="">Select</option>
 @foreach($drivers as $driver)
-<option value="{{ $driver->id }}">{{ $driver->name }} - {{ $driver->license }}</option>
+<option value="{{ $driver->id }}" {{ $req->driver == $driver->id ? 'selected' : '' }}>
+{{ $driver->name }} - {{ $driver->license_no }}
+</option>
 @endforeach
 </select>
 </td>
 
+<!-- TICKET -->
 <td class="d-none d-md-table-cell">
 <input type="text" class="form-control form-control-sm" value="{{ $req->tickets }}">
 </td>
 
+<!-- STATUS -->
 <td>
 <span class="badge 
 @if($req->status == 'Approved') bg-success
@@ -117,11 +123,33 @@ body { background-color: #f4f6f9; }
 </span>
 </td>
 
+<!-- ✅ ADMIN REMARKS -->
+<td>
+<form method="POST" action="/request/{{ $req->id }}/remarks">
+@csrf
+@method('PUT')
+
+<div class="d-flex">
+<input type="text"
+       name="admin_remarks"
+       class="form-control form-control-sm me-2"
+       value="{{ $req->admin_remarks }}"
+       placeholder="Add remarks"
+       {{ $req->status == 'Approved' ? 'readonly' : '' }}>
+
+<button class="btn btn-primary btn-sm">Save</button>
+</div>
+
+</form>
+</td>
+
+<!-- ACTION -->
 <td>
 <div class="d-flex gap-1 flex-wrap">
+
 <form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
-<button type="submit" class="btn btn-success btn-sm"><i class="bi bi-check"></i></button>
+<button class="btn btn-success btn-sm"><i class="bi bi-check"></i></button>
 </form>
 
 <a href="/request/{{ $req->id }}/reject" class="btn btn-warning btn-sm">
@@ -133,13 +161,15 @@ body { background-color: #f4f6f9; }
 @method('DELETE')
 <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
 </form>
+
 </div>
 </td>
 
 </tr>
+
 @empty
 <tr>
-<td colspan="9" class="text-center">No data found</td>
+<td colspan="10" class="text-center">No data found</td>
 </tr>
 @endforelse
 </tbody>
@@ -198,8 +228,8 @@ body { background-color: #f4f6f9; }
 
 </div>
 
-<!-- ✅ ADD DRIVER MODAL (FIXED) -->
-<div class="modal fade" id="addDriverModal" tabindex="-1">
+<!-- MODAL -->
+<div class="modal fade" id="addDriverModal">
   <div class="modal-dialog">
     <div class="modal-content">
 
@@ -207,7 +237,7 @@ body { background-color: #f4f6f9; }
         @csrf
 
         <div class="modal-header">
-          <h5 class="modal-title">Add Driver</h5>
+          <h5>Add Driver</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
@@ -217,7 +247,7 @@ body { background-color: #f4f6f9; }
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Save</button>
+          <button class="btn btn-success">Save</button>
         </div>
 
       </form>
@@ -226,7 +256,6 @@ body { background-color: #f4f6f9; }
   </div>
 </div>
 
-<!-- ✅ ONLY ONE JS (IMPORTANT) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

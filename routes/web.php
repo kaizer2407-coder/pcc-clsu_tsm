@@ -281,3 +281,4 @@ Route::get('/test', function () {
     return 'OK';
 });
 
+Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);

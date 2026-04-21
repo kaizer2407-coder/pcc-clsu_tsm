@@ -17,7 +17,8 @@ class RequestModel extends Model
         'date',
         'status',
         'driver',
-        'tickets'
+        'tickets',
+        'admin_remarks'
     ];
 
     // 🔥 ADD THIS FUNCTION
