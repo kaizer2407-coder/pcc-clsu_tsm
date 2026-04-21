@@ -12,17 +12,19 @@
 body { background-color: #f4f6f9; }
 .bg-navy { background-color: #0a1f44; }
 .text-yellow { color: #ffc107; }
+
 .card { border-radius: 12px; }
 
-@media (max-width: 768px) {
-    table { font-size: 11px; }
-    th, td { padding: 5px; white-space: nowrap; }
-    .btn-sm { padding: 3px 6px; font-size: 10px; }
-    .form-control-sm, .form-select-sm {
-        font-size: 10px;
-        padding: 2px;
-    }
+.label {
+    font-weight: 600;
+    color: #0a1f44;
+    font-size: 13px;
 }
+
+.value {
+    font-size: 13px;
+}
+
 </style>
 </head>
 
@@ -39,7 +41,7 @@ body { background-color: #f4f6f9; }
 <h3 class="mb-4">Admin Dashboard</h3>
 
 <!-- CARDS -->
-<div class="row g-3">
+<div class="row g-3 mb-3">
     <div class="col-12 col-md-4">
         <div class="card p-3 shadow text-center">
             <h6>Total Requests</h6>
@@ -62,53 +64,66 @@ body { background-color: #f4f6f9; }
     </div>
 </div>
 
-<!-- REQUEST TABLE -->
-<div class="card mt-4 shadow">
-<div class="card-header bg-navy text-white">All Travel Requests</div>
+<!-- REQUEST LIST -->
+<div class="row g-3">
 
-<div class="card-body">
-<div class="table-responsive">
-<table class="table table-hover">
-
-<thead>
-<tr>
-<th>Passenger</th>
-<th>Destination</th>
-<th class="d-none d-md-table-cell">Purpose</th>
-<th>Date</th>
-<th class="d-none d-md-table-cell">Requester</th>
-<th>Driver</th>
-<th class="d-none d-md-table-cell">Ticket</th>
-<th>Status</th>
-<th>Remarks</th>
-<th>Action</th>
-</tr>
-</thead>
-
-<tbody>
 @forelse($requests as $req)
-<tr>
 
-<td>{{ $req->passenger }}</td>
-<td>{{ $req->destination }}</td>
-<td class="d-none d-md-table-cell">{{ $req->purpose }}</td>
-<td>{{ $req->date }}</td>
-<td class="d-none d-md-table-cell">{{ $req->user->name ?? '' }}</td>
+<div class="col-12">
+<div class="card shadow p-3">
 
-<!-- DRIVER (linked to approve) -->
-<td>
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <strong>{{ $req->passenger }}</strong>
+
+    <span class="badge 
+    @if($req->status == 'Approved') bg-success
+    @elseif($req->status == 'Pending') bg-warning text-dark
+    @else bg-danger
+    @endif">
+    {{ $req->status }}
+    </span>
+</div>
+
+<!-- DETAILS -->
+<div class="row mb-2">
+    <div class="col-6">
+        <div class="label">Destination</div>
+        <div class="value">{{ $req->destination }}</div>
+    </div>
+
+    <div class="col-6">
+        <div class="label">Date</div>
+        <div class="value">{{ $req->date }}</div>
+    </div>
+
+    <div class="col-6">
+        <div class="label">Purpose</div>
+        <div class="value">{{ $req->purpose }}</div>
+    </div>
+
+    <div class="col-6">
+        <div class="label">Requester</div>
+        <div class="value">{{ $req->user->name ?? '' }}</div>
+    </div>
+</div>
+
+<!-- DRIVER -->
+<div class="mb-2">
 <select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
-<option value="">Select</option>
+<option value="">Select Driver</option>
+
 @foreach($drivers as $driver)
 <option value="{{ $driver->id }}" {{ $req->driver == $driver->id ? 'selected' : '' }}>
 {{ $driver->name }} - {{ $driver->license_no }}
 </option>
 @endforeach
+
 </select>
-</td>
+</div>
 
 <!-- TICKET -->
-<td class="d-none d-md-table-cell">
+<div class="mb-2">
 <form method="POST" action="/request/{{ $req->id }}/tickets">
 @csrf
 @method('PUT')
@@ -118,6 +133,7 @@ body { background-color: #f4f6f9; }
        name="tickets"
        class="form-control form-control-sm me-2"
        value="{{ $req->tickets }}"
+       placeholder="Ticket No"
        {{ $req->tickets ? 'readonly' : '' }}>
 
 @if(!$req->tickets)
@@ -126,21 +142,10 @@ body { background-color: #f4f6f9; }
 </div>
 
 </form>
-</td>
-
-<!-- STATUS -->
-<td>
-<span class="badge 
-@if($req->status == 'Approved') bg-success
-@elseif($req->status == 'Pending') bg-warning text-dark
-@else bg-danger
-@endif">
-{{ $req->status }}
-</span>
-</td>
+</div>
 
 <!-- REMARKS -->
-<td>
+<div class="mb-2">
 <form method="POST" action="/request/{{ $req->id }}/remarks">
 @csrf
 @method('PUT')
@@ -156,13 +161,11 @@ body { background-color: #f4f6f9; }
 </div>
 
 </form>
-</td>
+</div>
 
-<!-- ACTION -->
-<td>
-<div class="d-flex gap-1 flex-wrap">
+<!-- ACTIONS -->
+<div class="d-flex flex-wrap gap-2 mt-2">
 
-<!-- APPROVE -->
 <form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
 <button class="btn btn-success btn-sm">
@@ -170,7 +173,6 @@ body { background-color: #f4f6f9; }
 </button>
 </form>
 
-<!-- REJECT -->
 <form method="POST" action="/request/{{ $req->id }}/reject">
 @csrf
 <button class="btn btn-warning btn-sm">
@@ -178,7 +180,6 @@ body { background-color: #f4f6f9; }
 </button>
 </form>
 
-<!-- RESET TICKET -->
 <form method="POST" action="/request/{{ $req->id }}/reset-ticket">
 @csrf
 @method('PUT')
@@ -187,7 +188,6 @@ body { background-color: #f4f6f9; }
 </button>
 </form>
 
-<!-- DELETE -->
 <form method="POST" action="/request/{{ $req->id }}">
 @csrf
 @method('DELETE')
@@ -197,32 +197,28 @@ body { background-color: #f4f6f9; }
 </form>
 
 </div>
-</td>
 
-</tr>
+</div>
+</div>
 
 @empty
-<tr>
-<td colspan="10" class="text-center">No data found</td>
-</tr>
+<div class="col-12 text-center">No data found</div>
 @endforelse
-</tbody>
 
-</table>
 </div>
 
+<!-- PAGINATION -->
+<div class="mt-3">
 {{ $requests->links() }}
-
-</div>
 </div>
 
-<!-- DRIVER TABLE -->
+<!-- DRIVER SECTION -->
 <div class="card mt-4 shadow">
 
 <div class="card-header bg-navy text-white d-flex justify-content-between">
 <span>Drivers</span>
 
-<button type="button" class="btn btn-warning btn-sm"
+<button class="btn btn-warning btn-sm"
         data-bs-toggle="modal"
         data-bs-target="#addDriverModal">
 + Add Driver
@@ -230,33 +226,28 @@ body { background-color: #f4f6f9; }
 </div>
 
 <div class="card-body">
-<div class="table-responsive">
-<table class="table table-hover">
 
-<thead>
-<tr>
-<th>Name</th>
-<th>License</th>
-<th>Status</th>
-</tr>
-</thead>
+<div class="row g-2">
 
-<tbody>
 @forelse($drivers as $driver)
-<tr>
-<td>{{ $driver->name }}</td>
-<td>{{ $driver->license_no }}</td>
-<td><span class="badge bg-success">Available</span></td>
-</tr>
-@empty
-<tr>
-<td colspan="3" class="text-center">No drivers</td>
-</tr>
-@endforelse
-</tbody>
 
-</table>
+<div class="col-12 col-md-4">
+<div class="card p-2 shadow-sm">
+
+<strong>{{ $driver->name }}</strong>
+<div>{{ $driver->license_no }}</div>
+
+<span class="badge bg-success mt-1">Available</span>
+
 </div>
+</div>
+
+@empty
+<div class="text-center">No drivers</div>
+@endforelse
+
+</div>
+
 </div>
 </div>
 
