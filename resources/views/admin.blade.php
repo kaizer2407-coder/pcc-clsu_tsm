@@ -207,6 +207,41 @@ body { background-color: #f4f6f9; }
 </tr>
 @endforelse
 </tbody>
+
+</table>
+</div>
+
+{{ $requests->links() }}
+
+</div>
+</div>
+
+<!-- DRIVER TABLE -->
+<div class="card mt-4 shadow">
+
+<div class="card-header bg-navy text-white d-flex justify-content-between">
+<span>Drivers</span>
+
+<button type="button" class="btn btn-warning btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#addDriverModal">
++ Add Driver
+</button>
+</div>
+
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>License</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
 @forelse($drivers as $driver)
 <tr>
 <td>{{ $driver->name }}</td>
