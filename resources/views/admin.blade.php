@@ -89,6 +89,11 @@ body { background-color: #f4f6f9; }
 @forelse($requests as $req)
 <tr>
 
+<!-- ✅ UPDATE FORM -->
+<form method="POST" action="/request/{{ $req->id }}/update-all">
+@csrf
+@method('PUT')
+
 <td>{{ $req->passenger }}</td>
 <td>{{ $req->destination }}</td>
 <td class="d-none d-md-table-cell">{{ $req->purpose }}</td>
@@ -97,7 +102,7 @@ body { background-color: #f4f6f9; }
 
 <!-- DRIVER -->
 <td>
-<select name="driver" form="approveForm{{ $req->id }}" class="form-select form-select-sm">
+<select name="driver" class="form-select form-select-sm">
 <option value="">Select</option>
 @foreach($drivers as $driver)
 <option value="{{ $driver->id }}" {{ $req->driver == $driver->id ? 'selected' : '' }}>
@@ -109,7 +114,10 @@ body { background-color: #f4f6f9; }
 
 <!-- TICKET -->
 <td class="d-none d-md-table-cell">
-<input type="text" class="form-control form-control-sm" value="{{ $req->tickets }}">
+<input type="text"
+       name="tickets"
+       class="form-control form-control-sm"
+       value="{{ $req->tickets }}">
 </td>
 
 <!-- STATUS -->
@@ -123,43 +131,59 @@ body { background-color: #f4f6f9; }
 </span>
 </td>
 
-<!-- ✅ ADMIN REMARKS -->
+<!-- ✅ REMARKS (NO BUTTON) -->
 <td>
-<form method="POST" action="/request/{{ $req->id }}/remarks">
-@csrf
-@method('PUT')
-
-<div class="d-flex">
 <input type="text"
        name="admin_remarks"
-       class="form-control form-control-sm me-2"
+       class="form-control form-control-sm"
        value="{{ $req->admin_remarks }}"
-       placeholder="Add remarks"
+       placeholder="Remarks"
        {{ $req->status == 'Approved' ? 'readonly' : '' }}>
-
-<button class="btn btn-primary btn-sm">Save</button>
-</div>
-
-</form>
 </td>
 
 <!-- ACTION -->
 <td>
 <div class="d-flex gap-1 flex-wrap">
 
-<form id="approveForm{{ $req->id }}" method="POST" action="/request/{{ $req->id }}/approve">
+<!-- ✅ UPDATE BUTTON -->
+<button type="submit" class="btn btn-primary btn-sm" title="Update">
+<i class="bi bi-save"></i>
+</button>
+
+</form> <!-- ✅ CLOSE UPDATE FORM -->
+
+<!-- APPROVE -->
+<form method="POST" action="/request/{{ $req->id }}/approve">
 @csrf
-<button class="btn btn-success btn-sm"><i class="bi bi-check"></i></button>
+<button class="btn btn-success btn-sm">
+<i class="bi bi-check"></i>
+</button>
 </form>
 
-<a href="/request/{{ $req->id }}/reject" class="btn btn-warning btn-sm">
+<!-- REJECT -->
+<form method="POST" action="/request/{{ $req->id }}/reject">
+@csrf
+<button class="btn btn-warning btn-sm">
 <i class="bi bi-x"></i>
-</a>
+</button>
+</form>
 
+<!-- DELETE -->
 <form method="POST" action="/request/{{ $req->id }}">
 @csrf
 @method('DELETE')
-<button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+<button class="btn btn-danger btn-sm">
+<i class="bi bi-trash"></i>
+</button>
+</form>
+
+<!-- RESET TICKET -->
+<form method="POST" action="/request/{{ $req->id }}/reset-ticket">
+@csrf
+@method('PUT')
+<button class="btn btn-secondary btn-sm" title="Reset Ticket">
+<i class="bi bi-arrow-counterclockwise"></i>
+</button>
 </form>
 
 </div>

@@ -282,3 +282,8 @@ Route::get('/test', function () {
 });
 
 Route::put('/request/{id}/remarks', [RequestController::class, 'updateRemarks']);
+Route::put('/request/{id}/update-all', [RequestController::class, 'updateAll']);
+Route::post('/request/{id}/approve', [RequestController::class, 'approve']);
+Route::post('/request/{id}/reject', [RequestController::class, 'reject']);
+Route::put('/request/{id}/reset-ticket', [RequestController::class, 'resetTicket']);
+Route::delete('/request/{id}', [RequestController::class, 'destroy']);

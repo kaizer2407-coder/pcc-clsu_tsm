@@ -29,4 +29,17 @@ abstract class Controller
 
         return back()->with('success', 'Remarks updated');
     }
+
+    public function updateAll(Request $request, $id)
+{
+    $req = RequestModel::findOrFail($id);
+
+    $req->driver = $request->driver;
+    $req->tickets = $request->tickets;
+    $req->admin_remarks = $request->admin_remarks;
+
+    $req->save();
+
+    return back()->with('success', 'Updated successfully');
+}
 }
