@@ -15,18 +15,5 @@ class RequestController extends Controller
         return back()->with('success', 'Ticket reset');
     }
 
-    public function saveTicket(Request $request, $id)
-    {
-        $request->validate([
-            'tickets' => 'nullable|string|max:50'
-        ]);
-
-        $req = \App\Models\RequestModel::findOrFail($id);
-
-        $req->tickets = $request->tickets;
-        $req->save();
-
-     
-        return back()->with('success', 'Ticket saved');
-    }
+    
 }
